@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -24,6 +25,9 @@ public class VeterinaryController {
     @Autowired
     VeterinaryRepository veterinaryRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @GetMapping
     @Operation(summary = "Listar todos os veterinários")
     public ResponseEntity<List<VeterinaryModel>> getAllVeterinary() {
@@ -34,26 +38,26 @@ public class VeterinaryController {
     @PostMapping
     @Operation(summary = "Cadastrar um novo veterinário")
     public ResponseEntity<VeterinaryModel> addVeterinary(@RequestBody VeterinaryModel veterinary) {
+        // Criptografar a senha antes de salvar
+        veterinary.setPassword(passwordEncoder.encode(veterinary.getPassword()));
         VeterinaryModel savedVeterinary = veterinaryRepository.save(veterinary);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedVeterinary);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar veterinário por ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Veterinário atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Veterinário não encontrado")
-    })
+    @Operation(summary = "Atualizar veterinário pelo ID")
     public ResponseEntity<VeterinaryModel> updateVeterinary(@PathVariable Long id, @RequestBody VeterinaryModel veterinary) {
         return veterinaryRepository.findById(id)
                 .map(existing -> {
                     existing.setName(veterinary.getName());
+                    if (veterinary.getPassword() != null && !veterinary.getPassword().isEmpty()) {
+                        existing.setPassword(passwordEncoder.encode(veterinary.getPassword()));
+                    }
                     existing.setEmail(veterinary.getEmail());
-                    existing.setPhone(veterinary.getPhone());
                     existing.setCrmv(veterinary.getCrmv());
                     existing.setSpecialityenum(veterinary.getSpecialityenum());
+                    existing.setPhone(veterinary.getPhone());
                     existing.setImageurl(veterinary.getImageurl());
-                    existing.setPassword(veterinary.getPassword());
                     return ResponseEntity.ok(veterinaryRepository.save(existing));
                 })
                 .orElse(ResponseEntity.notFound().build());

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -23,18 +24,22 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder; // Injetar o PasswordEncoder
+
     @Operation(summary = "Buscar todos os usuários")
     @GetMapping
     public ResponseEntity<List<UserModel>> getAllUsers() {
         return ResponseEntity.ok(userRepository.findAll());
     }
 
-    @Operation(summary = "Adicionar um novo usuário")
     @PostMapping
     public ResponseEntity<UserModel> addUser(@RequestBody @Valid UserModel user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         UserModel savedUser = userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
+
 
     @Operation(summary = "Atualizar um usuário existente")
     @PutMapping("/{id}")
@@ -42,7 +47,9 @@ public class UserController {
         return userRepository.findById(id)
                 .map(existing -> {
                     existing.setUsername(user.getUsername());
-                    existing.setPassword(user.getPassword());
+                    if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                        existing.setPassword(passwordEncoder.encode(user.getPassword()));
+                    }
                     existing.setEmail(user.getEmail());
                     existing.setPhone(user.getPhone());
                     existing.setAddress(user.getAddress());

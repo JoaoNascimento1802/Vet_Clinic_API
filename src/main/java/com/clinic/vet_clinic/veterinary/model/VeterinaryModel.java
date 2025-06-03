@@ -31,7 +31,6 @@ public class VeterinaryModel {
     private String name;
 
     @NotBlank
-    @Size(min = 3 , max = 30)
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).+$", message = "A senha deve conter pelo menos um número, uma letra maiúscula, uma letra minúscula e um caractere especial.")
     @Column(nullable = false)
     private String password;

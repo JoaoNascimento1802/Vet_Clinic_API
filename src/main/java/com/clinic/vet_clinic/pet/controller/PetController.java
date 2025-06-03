@@ -1,106 +1,203 @@
-package com.clinic.vet_clinic.pet.controller;
+package com.clinic.vet_clinic.pet.controller; // Ajuste o pacote conforme sua estrutura
 
-import com.clinic.vet_clinic.pet.dto.PetRequestDTO;
-import com.clinic.vet_clinic.pet.dto.PetResponseDTO;
-import com.clinic.vet_clinic.pet.mapper.PetMapper;
 import com.clinic.vet_clinic.pet.model.PetModel;
 import com.clinic.vet_clinic.pet.repository.PetRepository;
-import com.clinic.vet_clinic.user.model.UserModel;
-import com.clinic.vet_clinic.user.repository.UserRepository;
+import com.clinic.vet_clinic.user.repository.UserRepository; // Para buscar o usuário dono do pet
+import com.clinic.vet_clinic.user.model.UserModel; // Para associar o pet ao usuário
+import com.clinic.vet_clinic.config.CloudinaryService; // Para o serviço de upload de imagem
+import com.clinic.vet_clinic.pet.dto.PetRequestDTO; // Seu DTO de requisição
+import com.clinic.vet_clinic.pet.dto.PetResponseDTO; // Seu DTO de resposta (opcional, mas boa prática)
+
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid; // Para validação do DTO
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-
+import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors; // Para mapear para DTO de resposta
 
 @RestController
 @RequestMapping("/pets")
-@RequiredArgsConstructor
-@Tag(name = "Pets", description = "Endpoints relacionados ao gerenciamento de pets")
+@Tag(name = "Pets", description = "Endpoints relacionados aos pets dos usuários")
 public class PetController {
 
-    private final PetRepository petRepository;
-    private final PetMapper petMapper;
-    private final UserRepository userRepository;
+    @Autowired
+    private PetRepository petRepository;
 
-    @Operation(summary = "Cadastrar um novo pet")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pet cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos")
-    })
-    @PostMapping
-    public ResponseEntity<PetResponseDTO> create(@RequestBody PetRequestDTO dto) {
-        PetModel pet = petMapper.toModel(dto);
+    @Autowired
+    private UserRepository userRepository; // Injetado para buscar o UserModel
 
+    @Autowired
+    private CloudinaryService cloudinaryService; // Injetado para upload de imagem
 
-        UserModel usuario = userRepository.findById(dto.usuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + dto.usuarioId()));
-
-        pet.setUsuario(usuario); // Associa o UserModel ao PetModel
-
-        PetModel saved = petRepository.save(pet);
-        return ResponseEntity.ok(petMapper.toDTO(saved));
-    }
-
-
-    @Operation(summary = "Listar todos os pets")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de pets retornada com sucesso"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao buscar pets")
-    })
     @GetMapping
-    public ResponseEntity<List<PetResponseDTO>> getAll() {
-        List<PetResponseDTO> pets = petRepository.findAll()
-                .stream()
-                .map(petMapper::toDTO)
+    @Operation(summary = "Listar todos os pets")
+    public ResponseEntity<List<PetResponseDTO>> getAllPets() {
+        List<PetModel> pets = petRepository.findAll();
+        List<PetResponseDTO> petDTOs = pets.stream()
+                .map(this::convertToPetResponseDTO)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(pets);
+
+        return petDTOs.isEmpty()
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(petDTOs)
+                : ResponseEntity.ok(petDTOs);
     }
 
-    @Operation(summary = "Buscar pet por ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pet encontrado"),
-            @ApiResponse(responseCode = "404", description = "Pet não encontrado")
-    })
     @GetMapping("/{id}")
-    public ResponseEntity<PetResponseDTO> getById(@PathVariable Long id) {
-        return petRepository.findById(id)
-                .map(petMapper::toDTO)
+    @Operation(summary = "Buscar pet por ID")
+    public ResponseEntity<PetResponseDTO> getPetById(@PathVariable Long id) {
+        Optional<PetModel> petOptional = petRepository.findById(id);
+        return petOptional.map(this::convertToPetResponseDTO) // Converte para DTO de resposta
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @Operation(summary = "Atualizar pet por ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pet atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Pet não encontrado")
-    })
+    @PostMapping
+    @Operation(summary = "Cadastrar um novo pet com imagem")
+    public ResponseEntity<?> createPet(
+            @RequestPart("pet") @Valid PetRequestDTO petDto, // Recebe o PetRequestDTO validado
+            @RequestPart(value = "image", required = false) MultipartFile image) { // Imagem opcional
+
+        Optional<UserModel> owner = userRepository.findById(petDto.usuarioId());
+        if (owner.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário dono do pet não encontrado.");
+        }
+
+        PetModel pet = new PetModel();
+        pet.setName(petDto.name());
+        pet.setAge(petDto.age());
+        pet.setSpeciespet(petDto.speciespet());
+        pet.setPersonalizatedSpecies(petDto.personalizatedSpecies());
+        pet.setGender(petDto.gender());
+        pet.setPersonalizedBreed(petDto.personalizedBreed());
+        pet.setDogBreed(petDto.dogBreed());
+        pet.setCatBreed(petDto.catBreed());
+        pet.setBirdBreed(petDto.birdBreed());
+        pet.setFishBreed(petDto.fishBreed());
+        pet.setRabbitBreed(petDto.rabbitBreed());
+        pet.setReptileBreed(petDto.reptileBreed());
+        pet.setRodentBreed(petDto.rodentBreed());
+
+        pet.setUsuario(owner.get());
+
+        try {
+            if (image != null && !image.isEmpty()) {
+                Map<String, Object> uploadResult = cloudinaryService.uploadImage(image);
+                String imageUrl = uploadResult.get("secure_url").toString();
+                pet.setImageurl(imageUrl); // Salva a URL da imagem no PetModel
+            } else if (petDto.imageurl() != null && !petDto.imageurl().isEmpty()) {
+                pet.setImageurl(petDto.imageurl());
+            }
+
+            PetModel savedPet = petRepository.save(pet);
+            return ResponseEntity.status(HttpStatus.CREATED).body(convertToPetResponseDTO(savedPet)); // Retorna o DTO de resposta
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao fazer upload da imagem: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao cadastrar pet: " + e.getMessage());
+        }
+    }
+
+
     @PutMapping("/{id}")
-    public ResponseEntity<PetResponseDTO> update(@PathVariable Long id, @RequestBody PetRequestDTO dto) {
-        return petRepository.findById(id).map(existing -> {
-            PetModel updated = petMapper.toModel(dto);
-            updated.setId(existing.getId());
-            PetModel saved = petRepository.save(updated);
-            return ResponseEntity.ok(petMapper.toDTO(saved));
-        }).orElse(ResponseEntity.notFound().build());
+    @Operation(summary = "Atualizar pet pelo ID (com opção de nova imagem)")
+    public ResponseEntity<?> updatePet(
+            @PathVariable Long id,
+            @RequestPart("pet") @Valid PetRequestDTO petDto, // Recebe o PetRequestDTO validado
+            @RequestPart(value = "image", required = false) MultipartFile image) { // Nova imagem opcional
+
+        Optional<PetModel> existingPetOptional = petRepository.findById(id);
+
+        if (existingPetOptional.isPresent()) {
+            PetModel existingPet = existingPetOptional.get();
+
+            Optional<UserModel> newOwner = userRepository.findById(petDto.usuarioId());
+            if (newOwner.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Novo usuário dono do pet não encontrado.");
+            }
+            existingPet.setUsuario(newOwner.get()); // Associa o novo UserModel
+
+            existingPet.setName(petDto.name());
+            existingPet.setAge(petDto.age());
+            existingPet.setSpeciespet(petDto.speciespet());
+            existingPet.setPersonalizatedSpecies(petDto.personalizatedSpecies());
+            existingPet.setGender(petDto.gender());
+            existingPet.setPersonalizedBreed(petDto.personalizedBreed());
+            existingPet.setDogBreed(petDto.dogBreed());
+            existingPet.setCatBreed(petDto.catBreed());
+            existingPet.setBirdBreed(petDto.birdBreed());
+            existingPet.setFishBreed(petDto.fishBreed());
+            existingPet.setRabbitBreed(petDto.rabbitBreed());
+            existingPet.setReptileBreed(petDto.reptileBreed());
+            existingPet.setRodentBreed(petDto.rodentBreed());
+
+            try {
+                if (image != null && !image.isEmpty()) {
+                    Map<String, Object> uploadResult = cloudinaryService.uploadImage(image);
+                    String imageUrl = uploadResult.get("secure_url").toString();
+                    existingPet.setImageurl(imageUrl); // Atualiza com nova URL
+                } else if (petDto.imageurl() == null || petDto.imageurl().isEmpty()) {
+                    existingPet.setImageurl(null);
+                } else {
+                    existingPet.setImageurl(petDto.imageurl());
+                }
+
+                PetModel savedPet = petRepository.save(existingPet);
+                return ResponseEntity.ok(convertToPetResponseDTO(savedPet)); // Retorna o DTO de resposta
+
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Erro ao fazer upload da imagem: " + e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Erro ao atualizar pet: " + e.getMessage());
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pet não encontrado.");
+        }
     }
 
-    @Operation(summary = "Deletar pet por ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Pet deletado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Pet não encontrado")
-    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return petRepository.findById(id).map(pet -> {
-            petRepository.delete(pet);
-            return ResponseEntity.noContent().<Void>build();
-        }).orElse(ResponseEntity.notFound().build());
+    @Operation(summary = "Deletar pet pelo ID")
+    public ResponseEntity<String> deletePet(@PathVariable Long id) {
+        if (petRepository.existsById(id)) {
+            petRepository.deleteById(id);
+            return ResponseEntity.ok("Pet deletado com sucesso!");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pet não encontrado.");
+        }
+    }
+
+    private PetResponseDTO convertToPetResponseDTO(PetModel pet) {
+        return new PetResponseDTO(
+                pet.getId(),
+                pet.getName(),
+                pet.getAge(),
+                pet.getImageurl(),
+                pet.getPersonalizatedSpecies(),
+                pet.getPersonalizedBreed(),
+                pet.getSpeciespet(),
+                pet.getGender(),
+                pet.getBirdBreed(),
+                pet.getCatBreed(),
+                pet.getDogBreed(),
+                pet.getFishBreed(),
+                pet.getRabbitBreed(),
+                pet.getReptileBreed(),
+                pet.getRodentBreed()
+        );
     }
 }

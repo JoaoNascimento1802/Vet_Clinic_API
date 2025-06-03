@@ -50,7 +50,7 @@ public class ConsultationModel {
         @Column(nullable = false)
         private String observations;
 
-        @ManyToOne
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "pet_id")
         private PetModel pet;
 
@@ -58,7 +58,7 @@ public class ConsultationModel {
         @JoinColumn(name = "usuario_id")
         private UserModel usuario;
 
-        @ManyToOne
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "veterinario_id")
         private VeterinaryModel veterinario;
 

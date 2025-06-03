@@ -2,6 +2,7 @@ package com.clinic.vet_clinic.pet.model;
 
 import com.clinic.vet_clinic.consultation.model.ConsultationModel;
 import com.clinic.vet_clinic.pet.breed.*;
+import com.clinic.vet_clinic.pet.dto.PetRequestDTO;
 import com.clinic.vet_clinic.pet.gender.Gender;
 import com.clinic.vet_clinic.pet.species.Species;
 import com.clinic.vet_clinic.user.model.UserModel;
@@ -83,6 +84,22 @@ public class PetModel {
     private UserModel usuario;
 
 
+    public PetModel(PetRequestDTO dto) {
+        this.name = dto.name();
+        this.age = dto.age();
+        this.imageurl = dto.imageurl();
+        this.speciespet = dto.speciespet();
+        this.personalizatedSpecies = dto.personalizatedSpecies();
+        this.gender = dto.gender();
+        this.dogBreed = dto.dogBreed();
+        this.catBreed = dto.catBreed();
+        this.birdBreed = dto.birdBreed();
+        this.fishBreed = dto.fishBreed();
+        this.rabbitBreed = dto.rabbitBreed();
+        this.reptileBreed = dto.reptileBreed();
+        this.rodentBreed = dto.rodentBreed();
+        this.personalizedBreed = dto.personalizedBreed();
+    }
 
 }
 

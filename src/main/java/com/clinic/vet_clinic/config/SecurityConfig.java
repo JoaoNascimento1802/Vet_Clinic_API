@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpMethod; // Import HttpMethod
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -17,21 +18,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Desabilita CSRF para APIs REST
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        // Endpoints públicos (swagger, etc.)
+                        // 1. Endpoints públicos (Swagger, etc.) - SEMPRE OS PRIMEIROS
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // Apenas ADMIN pode ver todos os usuários e criar novos
-                        .requestMatchers("/users/**").hasRole("ADMIN")
-                        // Apenas ADMIN pode ver todas as consultas e criar novas
+                        // 2. Regra para permitir a criação do PRIMEIRO ADMIN (apenas o POST)
+                        // Se você já criou o admin, pode COMENTAR ou REMOVER esta linha
+
+                        // 3. Regras para ADMIN - DEVEM VIR ANTES DE anyRequest().authenticated()
+                        // Garanta que estas linhas estejam presentes e CORRETAS
+                        .requestMatchers("/users/**").hasRole("ADMIN") // <-- Resto de /users exige ADMIN
                         .requestMatchers("/consultas/**").hasRole("ADMIN")
-                        // Apenas ADMIN pode ver todos os veterinários e criar novos
                         .requestMatchers("/veterinary/**").hasRole("ADMIN")
-                        // Permite acesso a outros endpoints como pets e clínicas para todos os usuários autenticados
+                        .requestMatchers("/clinic/**").hasRole("ADMIN")
+
+                        // 4. Regra para endpoints que exigem QUALQUER usuário autenticado (como /pets)
+                        // Esta regra captura todo o resto, então DEVE SER A ÚLTIMA DENTRE AS ESPECÍFICAS
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults()); // Usa autenticação HTTP Basic (para simplificar, em produção use OAuth2/JWT)
+                .httpBasic(withDefaults());
         return http.build();
     }
 

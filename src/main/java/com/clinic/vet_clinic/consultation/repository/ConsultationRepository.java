@@ -1,7 +1,7 @@
 package com.clinic.vet_clinic.consultation.repository;
 
 import com.clinic.vet_clinic.consultation.model.ConsultationModel;
-import com.clinic.vet_clinic.veterinary.speciality.SpecialityEnum;
+import com.clinic.vet_clinic.veterinary.speciality.SpecialityEnum; // Certifique-se de que o caminho do pacote está correto
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +14,7 @@ public interface ConsultationRepository extends JpaRepository<ConsultationModel,
     // Pesquisar por data da consulta
     List<ConsultationModel> findByConsultationdate(LocalDate consultationDate);
 
-    // Pesquisar por especialidade do médico
+    // Pesquisar por especialidade do médico (esta é a única definição necessária)
     List<ConsultationModel> findBySpecialityEnum(SpecialityEnum speciality);
 
     // Pesquisar por nome do médico (usando JOIN com VeterinaryModel)
@@ -27,4 +27,13 @@ public interface ConsultationRepository extends JpaRepository<ConsultationModel,
 
     // Você também pode querer combinar filtros, por exemplo:
     List<ConsultationModel> findByConsultationdateAndSpecialityEnum(LocalDate consultationDate, SpecialityEnum speciality);
+
+    // Buscar consultas por ID do veterinário
+    List<ConsultationModel> findByVeterinarioId(Long veterinarioId);
+
+    // Buscar consultas por ID do veterinário E especialidade
+    List<ConsultationModel> findByVeterinarioIdAndSpecialityEnum(Long veterinarioId, SpecialityEnum speciality);
+
+    // Você também pode adicionar filtros por data, paciente, etc., se precisar:
+    // List<ConsultationModel> findByConsultationdateBetween(LocalDate startDate, LocalDate endDate);
 }

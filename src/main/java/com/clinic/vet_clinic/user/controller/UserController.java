@@ -2,20 +2,21 @@ package com.clinic.vet_clinic.user.controller; // Ajuste o pacote conforme sua e
 
 import com.clinic.vet_clinic.user.model.UserModel;
 import com.clinic.vet_clinic.user.repository.UserRepository;
-import com.clinic.vet_clinic.config.CloudinaryService; // Importar o serviço Cloudinary
+// Removendo import da CloudinaryService
+// import com.clinic.vet_clinic.config.CloudinaryService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid; // Adicione se estiver usando validação no UserModel
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder; // Para criptografar a senha
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile; // Para o arquivo de imagem
+// Removendo import de MultipartFile
+// import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -27,11 +28,12 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private CloudinaryService cloudinaryService; // Injete o CloudinaryService
+    // Removendo a injeção da CloudinaryService
+    // @Autowired
+    // private CloudinaryService cloudinaryService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // Injete o PasswordEncoder
+    private PasswordEncoder passwordEncoder;
 
     // GET /users - Listar todos os usuários
     @GetMapping
@@ -52,42 +54,32 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // POST /users - Criar novo usuário com imagem
     @PostMapping
-    @Operation(summary = "Cadastrar um novo usuário com imagem")
+    @Operation(summary = "Cadastrar um novo usuário recebendo a URL da imagem")
     public ResponseEntity<?> createUser(
-            @RequestPart("user") UserModel user, // Dados do usuário
-            @RequestPart(value = "image", required = false) MultipartFile image) { // Imagem opcional
+            @RequestBody @Valid UserModel user) { // Agora recebe @RequestBody
 
         try {
-            // Se uma imagem foi fornecida, faça o upload para a Cloudinary
-            if (image != null && !image.isEmpty()) {
-                Map<String, Object> uploadResult = cloudinaryService.uploadImage(image);
-                String imageUrl = uploadResult.get("secure_url").toString();
-                user.setImageurl(imageUrl); // Salve a URL da imagem no modelo do usuário
-            }
+            // A URL da imagem é esperada diretamente no objeto user
+            // user.setImageurl(user.getImageurl()); // Isso já é feito pelo Spring ao mapear o JSON
 
             // Criptografa a senha antes de salvar
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             UserModel savedUser = userRepository.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
 
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao fazer upload da imagem: " + e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace(); // Para depuração
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao cadastrar usuário: " + e.getMessage());
         }
     }
 
-    // PUT /users/{id} - Atualizar usuário (com ou sem nova imagem)
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar usuário pelo ID (com opção de nova imagem)")
+    @Operation(summary = "Atualizar usuário pelo ID recebendo a URL da imagem")
     public ResponseEntity<?> updateUser(
             @PathVariable Long id,
-            @RequestPart("user") UserModel updatedUser, // Dados do usuário atualizados
-            @RequestPart(value = "image", required = false) MultipartFile image) { // Nova imagem opcional
+            @RequestBody @Valid UserModel updatedUser) { // Agora recebe @RequestBody
 
         Optional<UserModel> existingUserOptional = userRepository.findById(id);
 
@@ -100,32 +92,19 @@ public class UserController {
             existingUser.setPhone(updatedUser.getPhone());
             existingUser.setAddress(updatedUser.getAddress());
             existingUser.setRg(updatedUser.getRg());
-            // Role e Password geralmente têm lógica de atualização separada ou mais restrita
-            // Se a senha for alterada, criptografe-a:
+            // A URL da imagem vem diretamente do JSON
+            existingUser.setImageurl(updatedUser.getImageurl()); // Atualiza ou define como nulo
+
             if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
                 existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
             }
-            //existingUser.setRole(updatedUser.getRole()); // Cuidado ao permitir a atualização de role diretamente
 
             try {
-                // Se uma nova imagem foi fornecida, faça o upload e atualize a URL
-                if (image != null && !image.isEmpty()) {
-                    Map<String, Object> uploadResult = cloudinaryService.uploadImage(image);
-                    String imageUrl = uploadResult.get("secure_url").toString();
-                    existingUser.setImageurl(imageUrl);
-                } else if (updatedUser.getImageurl() == null || updatedUser.getImageurl().isEmpty()) {
-                    // Se nenhuma nova imagem foi fornecida E a URL no JSON veio vazia/nula, pode ser para remover a imagem
-                    existingUser.setImageurl(null); // Ou você pode ter uma lógica para deletar da Cloudinary
-                }
-                // Se image é nula e updatedUser.getImageurl() não é nula/vazia, mantém a imagem existente
-
                 UserModel savedUser = userRepository.save(existingUser);
                 return ResponseEntity.ok(savedUser);
 
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Erro ao fazer upload da imagem: " + e.getMessage());
             } catch (Exception e) {
+                e.printStackTrace(); // Para depuração
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Erro ao atualizar usuário: " + e.getMessage());
             }

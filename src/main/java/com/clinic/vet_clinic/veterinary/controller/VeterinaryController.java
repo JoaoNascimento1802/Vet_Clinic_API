@@ -2,20 +2,20 @@ package com.clinic.vet_clinic.veterinary.controller; // Ajuste o pacote
 
 import com.clinic.vet_clinic.veterinary.model.VeterinaryModel;
 import com.clinic.vet_clinic.veterinary.repository.VeterinaryRepository;
-import com.clinic.vet_clinic.config.CloudinaryService; // Importar o serviço Cloudinary
+
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+// Removendo import de MultipartFile
+// import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -26,8 +26,9 @@ public class VeterinaryController {
     @Autowired
     private VeterinaryRepository veterinaryRepository;
 
-    @Autowired
-    private CloudinaryService cloudinaryService; // Injete o CloudinaryService
+    // Removendo a injeção da CloudinaryService
+    // @Autowired
+    // private CloudinaryService cloudinaryService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -51,72 +52,56 @@ public class VeterinaryController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // POST /veterinary - Criar novo veterinário com imagem
     @PostMapping
-    @Operation(summary = "Cadastrar um novo veterinário com imagem")
+    @Operation(summary = "Cadastrar um novo veterinário recebendo a URL da imagem")
     public ResponseEntity<?> createVeterinary(
-            @RequestPart("veterinary") VeterinaryModel veterinary,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @RequestBody @Valid VeterinaryModel veterinary) { // Agora recebe @RequestBody
 
         try {
-            if (image != null && !image.isEmpty()) {
-                Map<String, Object> uploadResult = cloudinaryService.uploadImage(image);
-                String imageUrl = uploadResult.get("secure_url").toString();
-                veterinary.setImageurl(imageUrl);
-            }
+            // A URL da imagem é esperada diretamente no objeto veterinary
+            // veterinary.setImageurl(veterinary.getImageurl()); // Isso já é feito pelo Spring ao mapear o JSON
 
+            // Criptografa a senha antes de salvar
             veterinary.setPassword(passwordEncoder.encode(veterinary.getPassword()));
             VeterinaryModel savedVeterinary = veterinaryRepository.save(veterinary);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedVeterinary);
 
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao fazer upload da imagem: " + e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace(); // Para depuração
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao cadastrar veterinário: " + e.getMessage());
         }
     }
 
-    // PUT /veterinary/{id} - Atualizar veterinário (com ou sem nova imagem)
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar veterinário pelo ID (com opção de nova imagem)")
+    @Operation(summary = "Atualizar veterinário pelo ID recebendo a URL da imagem")
     public ResponseEntity<?> updateVeterinary(
             @PathVariable Long id,
-            @RequestPart("veterinary") VeterinaryModel updatedVeterinary,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @RequestBody @Valid VeterinaryModel updatedVeterinary) { // Agora recebe @RequestBody
 
         Optional<VeterinaryModel> existingVeterinaryOptional = veterinaryRepository.findById(id);
 
         if (existingVeterinaryOptional.isPresent()) {
             VeterinaryModel existingVeterinary = existingVeterinaryOptional.get();
-
+            // Atualiza os campos que podem ser alterados
             existingVeterinary.setName(updatedVeterinary.getName());
             existingVeterinary.setEmail(updatedVeterinary.getEmail());
             existingVeterinary.setCrmv(updatedVeterinary.getCrmv());
             existingVeterinary.setSpecialityenum(updatedVeterinary.getSpecialityenum());
             existingVeterinary.setPhone(updatedVeterinary.getPhone());
+            // A URL da imagem vem diretamente do JSON
+            existingVeterinary.setImageurl(updatedVeterinary.getImageurl()); // Atualiza ou define como nulo
 
             if (updatedVeterinary.getPassword() != null && !updatedVeterinary.getPassword().isEmpty()) {
                 existingVeterinary.setPassword(passwordEncoder.encode(updatedVeterinary.getPassword()));
             }
 
             try {
-                if (image != null && !image.isEmpty()) {
-                    Map<String, Object> uploadResult = cloudinaryService.uploadImage(image);
-                    String imageUrl = uploadResult.get("secure_url").toString();
-                    existingVeterinary.setImageurl(imageUrl);
-                } else if (updatedVeterinary.getImageurl() == null || updatedVeterinary.getImageurl().isEmpty()) {
-                    existingVeterinary.setImageurl(null);
-                }
-
                 VeterinaryModel savedVeterinary = veterinaryRepository.save(existingVeterinary);
                 return ResponseEntity.ok(savedVeterinary);
 
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Erro ao fazer upload da imagem: " + e.getMessage());
             } catch (Exception e) {
+                e.printStackTrace(); // Para depuração
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Erro ao atualizar veterinário: " + e.getMessage());
             }

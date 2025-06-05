@@ -7,8 +7,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore; // Importe esta anotação!
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +23,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "users")
-public class UserModel {
+public class UserModel implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,5 +76,36 @@ public class UserModel {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PetModel> pets;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // O prefixo 'ROLE_' é um padrão do Spring Security
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
 
+    @Override
+    public String getUsername() {
+        // O Spring Security usará este método, que deve retornar o identificador único.
+        // No seu caso, é o email.
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // Você pode adicionar lógica para expirar contas
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // Você pode adicionar lógica para bloquear contas
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // Você pode adicionar lógica para expirar credenciais
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true; // Você pode adicionar lógica para desabilitar contas
+    }
 }

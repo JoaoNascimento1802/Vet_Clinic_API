@@ -5,6 +5,7 @@ import com.clinic.vet_clinic.user.repository.UserRepository;
 // Removendo import da CloudinaryService
 // import com.clinic.vet_clinic.config.CloudinaryService;
 
+import com.clinic.vet_clinic.user.role.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid; // Adicione se estiver usando validação no UserModel
@@ -54,24 +55,19 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PostMapping
-    @Operation(summary = "Cadastrar um novo usuário recebendo a URL da imagem")
-    public ResponseEntity<?> createUser(
-            @RequestBody @Valid UserModel user) { // Agora recebe @RequestBody
-
+    @PostMapping("/register") // <-- Mude aqui para corresponder à regra pública
+    @Operation(summary = "Registrar um novo usuário")
+    public ResponseEntity<?> registerUser(@RequestBody @Valid UserModel user) { // renomeei de createUser
         try {
-            // A URL da imagem é esperada diretamente no objeto user
-            // user.setImageurl(user.getImageurl()); // Isso já é feito pelo Spring ao mapear o JSON
-
-            // Criptografa a senha antes de salvar
+            // Define o papel padrão para novos usuários
+            user.setRole(UserRole.USER);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             UserModel savedUser = userRepository.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-
         } catch (Exception e) {
-            e.printStackTrace(); // Para depuração
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao cadastrar usuário: " + e.getMessage());
+                    .body("Erro ao registrar usuário: " + e.getMessage());
         }
     }
 

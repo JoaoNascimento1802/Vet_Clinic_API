@@ -3,6 +3,7 @@ package com.clinic.vet_clinic.user.model;
 import com.clinic.vet_clinic.consultation.model.ConsultationModel;
 import com.clinic.vet_clinic.pet.model.PetModel;
 import com.clinic.vet_clinic.user.role.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore; // Importe esta anotação!
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -63,9 +64,11 @@ public class UserModel {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @OneToMany(mappedBy = "usuario" ,cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Já adicionado anteriormente para 'consultas'
+    @OneToMany(mappedBy = "usuario" ,cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private List<ConsultationModel> consultas;
 
+    @JsonIgnore // <--- ADICIONE ESTA LINHA AQUI!
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PetModel> pets;
 

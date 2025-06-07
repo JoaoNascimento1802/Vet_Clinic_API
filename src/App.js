@@ -1,24 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { AuthProvider } from './contexts/AuthContext';
+import AppRoutes from './routes/AppRoutes';
 
+/**
+ * Este é o componente principal da sua aplicação.
+ * Ele não tem visual próprio, mas organiza os componentes
+ * essenciais que devem funcionar em todo o site.
+ */
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    // O AuthProvider disponibiliza os dados de autenticação (usuário, token, etc.)
+    // para todos os componentes filhos, que no caso é a aplicação inteira.
+    <AuthProvider>
+      
+      {/* O AppRoutes é o componente que gerencia qual página será
+          exibida para o usuário com base no endereço da web. */}
+      <AppRoutes />
+
+    </AuthProvider>
   );
 }
 

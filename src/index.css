@@ -1,13 +1,83 @@
+/* Importa a fonte 'Poppins' do Google Fonts para um visual mais moderno */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Definição de variáveis de cor globais (CSS Variables).
+  Isso facilita a manutenção e a troca do tema do site no futuro.
+*/
+:root {
+  --cor-primaria: #3498db;      /* Azul principal para botões e links */
+  --cor-primaria-escura: #2980b9; /* Azul mais escuro para hover */
+  --cor-secundaria: #2c3e50;    /* Azul escuro/grafite para títulos e footer */
+  --cor-sucesso: #28a745;       /* Verde para ações de sucesso */
+  --cor-perigo: #dc3545;        /* Vermelho para ações de exclusão */
+  --cor-aviso: #ffc107;         /* Amarelo para ações de edição/aviso */
+
+  --cor-texto-principal: #333333; /* Cor principal do texto */
+  --cor-texto-secundario: #555555;/* Cor de texto mais clara */
+  
+  --cor-fundo: #f4f6f9;          /* Fundo geral da aplicação (cinza muito claro) */
+  --cor-superficie: #ffffff;      /* Fundo de cards, modais, etc. (branco) */
+  --cor-borda: #dee2e6;          /* Cor para bordas sutis */
+
+  --sombra-padrao: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Reset básico e Box Sizing
+  Garante que todos os elementos se comportem da mesma forma em diferentes navegadores.
+*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Estilos globais para o corpo da página */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto-principal);
+  line-height: 1.6;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Estilos base para links */
+a {
+  color: var(--cor-primaria);
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: var(--cor-primaria-escura);
+  text-decoration: underline;
+}
+
+/* Estilos base para imagens */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Estilização da barra de rolagem para um toque mais sofisticado */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cor-fundo);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

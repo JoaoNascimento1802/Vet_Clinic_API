@@ -1,0 +1,102 @@
+/* Navbar.module.css - Use as variáveis do index.css */
+.navbar {
+  background-color: var(--cor-superficie);
+  box-shadow: var(--sombra-padrao);
+  padding: 0.8rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.navContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.navLogo {
+  color: var(--cor-secundaria);
+  text-decoration: none;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.navMenu {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  gap: 1.5rem;
+}
+
+.navLink {
+  color: var(--cor-texto-secundario);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--cor-primaria);
+  transition: width 0.3s ease;
+}
+
+.navLink:hover, .navLink.active {
+  color: var(--cor-primaria);
+}
+
+.navLink.active::after {
+  width: 100%;
+}
+
+.navAuth {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.userName {
+  color: var(--cor-texto-secundario);
+  font-size: 0.9rem;
+}
+
+.navButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--cor-borda);
+  background-color: transparent;
+  color: var(--cor-texto-principal);
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.navButton:hover {
+  background-color: #f8f9fa;
+  border-color: #c6c9cc;
+}
+
+.navButtonPrimary {
+  background-color: var(--cor-primaria);
+  color: white;
+  border-color: var(--cor-primaria);
+}
+
+.navButtonPrimary:hover {
+  background-color: var(--cor-primaria-escura);
+  border-color: var(--cor-primaria-escura);
+}

@@ -8,30 +8,42 @@ const dashboardStyles = {
     gap: '20px'
 };
 const cardStyles = {
-    padding: '20px',
+    padding: '30px',
     border: '1px solid #ddd',
     borderRadius: '8px',
     textDecoration: 'none',
     color: '#333',
     textAlign: 'center',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+    backgroundColor: 'white',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease'
 };
+
+const cardHoverStyle = (e) => {
+    e.currentTarget.style.transform = 'translateY(-5px)';
+    e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)';
+}
+
+const cardUnhoverStyle = (e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+}
 
 const AdminDashboardPage = () => {
     return (
         <MainLayout>
             <h1>Painel do Administrador</h1>
+            <p style={{marginBottom: '2rem'}}>Selecione uma área para gerenciar.</p>
             <div style={dashboardStyles}>
-                <Link to="/admin/clinics" style={cardStyles}>
+                <Link to="/admin/clinics" style={cardStyles} onMouseEnter={cardHoverStyle} onMouseLeave={cardUnhoverStyle}>
                     <h2>Gerenciar Clínicas</h2>
                 </Link>
-                <Link to="/admin/vets" style={cardStyles}>
+                <Link to="/admin/vets" style={cardStyles} onMouseEnter={cardHoverStyle} onMouseLeave={cardUnhoverStyle}>
                     <h2>Gerenciar Veterinários</h2>
                 </Link>
-                <Link to="/admin/users" style={cardStyles}>
+                <Link to="/admin/users" style={cardStyles} onMouseEnter={cardHoverStyle} onMouseLeave={cardUnhoverStyle}>
                     <h2>Gerenciar Usuários</h2>
                 </Link>
-                {/* Adicione outros links aqui */}
             </div>
         </MainLayout>
     );

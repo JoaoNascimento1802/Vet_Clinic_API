@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getAllVeterinarians, deleteVeterinary } from '../../api/vetService';
 import MainLayout from '../../layouts/MainLayout';
 import LoadingSpinner from '../../components/common/loadingspinner/LoadingSpinner';
+import VeterinaryFormModal from '../Admin/VeterinaryFormModal';
+import { getAllVeterinarians, addVeterinary, updateVeterinary, deleteVeterinary } from '../../api/vetService';
 
-const tableCellStyle = { padding: '8px', border: '1px solid #ddd' };
-const buttonStyle = { marginRight: '5px', padding: '5px 10px', border: '1px solid', borderRadius: '4px', cursor: 'pointer' };
+// Estilos (podem ser movidos para um .module.css)
+const buttonStyle = { padding: '10px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' };
+const tableCellStyle = { padding: '12px', borderBottom: '1px solid #ddd', textAlign: 'left' };
+const actionButtonStyle = { marginRight: '8px', padding: '6px 12px', border: '1px solid transparent', borderRadius: '4px', cursor: 'pointer' };
 
 const AdminVetsPage = () => {
     const [vets, setVets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingVet, setEditingVet] = useState(null);
 
     const fetchVets = useCallback(async () => {
         try {
@@ -17,77 +22,81 @@ const AdminVetsPage = () => {
             const data = await getAllVeterinarians();
             setVets(data);
         } catch (err) {
-            setError('Falha ao carregar veterinários.');
+            setError('Falha ao carregar os dados dos veterinários.');
         } finally {
             setLoading(false);
         }
     }, []);
 
-    useEffect(() => {
-        fetchVets();
-    }, [fetchVets]);
+    useEffect(() => { fetchVets(); }, [fetchVets]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Tem certeza que deseja excluir este veterinário? Esta ação não pode ser desfeita.')) {
-            try {
-                await deleteVeterinary(id);
-                fetchVets(); // Recarrega a lista após a exclusão
-            } catch (err) {
-                alert('Falha ao excluir veterinário.');
+    const handleSave = async (vetData) => {
+        try {
+            const payload = { ...vetData };
+            // Não envia a senha se estiver vazia durante a edição
+            if (editingVet && !payload.password) {
+                delete payload.password;
             }
+
+            if (editingVet) {
+                await updateVeterinary(editingVet.id, payload);
+            } else {
+                await addVeterinary(payload);
+            }
+            fetchVets();
+            setIsModalOpen(false);
+        } catch (err) {
+            alert('Erro ao salvar veterinário.');
         }
     };
 
-    // Lógica para adicionar/editar (pode ser expandida com um modal)
-    const handleAdd = () => {
-        alert("Funcionalidade de 'Adicionar' a ser implementada com um formulário/modal.");
-        // Aqui você abriria um modal e chamaria a função addVeterinary do serviço.
+    const handleDelete = async (id) => {
+        if (window.confirm('Tem certeza?')) {
+            await deleteVeterinary(id);
+            fetchVets();
+        }
     };
 
-    const handleEdit = (vet) => {
-        alert(`Funcionalidade de 'Editar' para ${vet.name} a ser implementada.`);
-        // Aqui você abriria um modal pré-preenchido com os dados do 'vet'
-        // e chamaria a função updateVeterinary do serviço.
-    };
-
-    if (loading) return <MainLayout><LoadingSpinner /></MainLayout>;
+    const handleAddNew = () => { setEditingVet(null); setIsModalOpen(true); };
+    const handleEdit = (vet) => { setEditingVet(vet); setIsModalOpen(true); };
 
     return (
         <MainLayout>
-            <h1>Gerenciar Veterinários</h1>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <button onClick={handleAdd} style={{ ...buttonStyle, backgroundColor: '#28a745', color: 'white', marginBottom: '20px' }}>
-                Adicionar Novo Veterinário
-            </button>
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
-                <thead>
-                    <tr style={{ backgroundColor: '#f2f2f2' }}>
-                        <th style={tableCellStyle}>Nome</th>
-                        <th style={tableCellStyle}>Email</th>
-                        <th style="...tableCellStyle">CRMV</th>
-                        <th style="...tableCellStyle">Especialidade</th>
-                        <th style="...tableCellStyle">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {vets.map(vet => (
-                        <tr key={vet.id}>
-                            <td style={tableCellStyle}>{vet.name}</td>
-                            <td style={tableCellStyle}>{vet.email}</td>
-                            <td style={tableCellStyle}>{vet.crmv}</td>
-                            <td style={tableCellStyle}>{vet.specialityenum}</td>
-                            <td style={tableCellStyle}>
-                                <button onClick={() => handleEdit(vet)} style={{ ...buttonStyle, backgroundColor: '#ffc107' }}>
-                                    Editar
-                                </button>
-                                <button onClick={() => handleDelete(vet.id)} style={{ ...buttonStyle, backgroundColor: '#dc3545', color: 'white' }}>
-                                    Excluir
-                                </button>
-                            </td>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h1>Gerenciar Veterinários</h1>
+                <button onClick={handleAddNew} style={buttonStyle}>+ Adicionar Novo Veterinário</button>
+            </div>
+            {loading ? <LoadingSpinner /> : error ? <p style={{color: 'red'}}>{error}</p> : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+                    <thead>
+                        <tr style={{ backgroundColor: '#f8f9fa' }}>
+                            <th style={tableCellStyle}>Nome</th>
+                            <th style={tableCellStyle}>Email</th>
+                            <th style={tableCellStyle}>Especialidade</th>
+                            <th style={tableCellStyle}>Ações</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {vets.map(vet => (
+                            <tr key={vet.id}>
+                                <td style={tableCellStyle}>{vet.name}</td>
+                                <td style={tableCellStyle}>{vet.email}</td>
+                                <td style={tableCellStyle}>{vet.specialityenum}</td>
+                                <td style={tableCellStyle}>
+                                    <button onClick={() => handleEdit(vet)} style={{ ...actionButtonStyle, backgroundColor: '#ffc107' }}>Editar</button>
+                                    <button onClick={() => handleDelete(vet.id)} style={{ ...actionButtonStyle, backgroundColor: '#dc3545', color: 'white' }}>Excluir</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
+            <VeterinaryFormModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSave}
+                vet={editingVet}
+            />
         </MainLayout>
     );
 };

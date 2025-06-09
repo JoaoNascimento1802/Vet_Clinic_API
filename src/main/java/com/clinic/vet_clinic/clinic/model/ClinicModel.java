@@ -2,6 +2,7 @@ package com.clinic.vet_clinic.clinic.model;
 
 import com.clinic.vet_clinic.clinic.careservices.CareServices;
 import com.clinic.vet_clinic.consultation.model.ConsultationModel;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -48,6 +49,7 @@ public class ClinicModel {
     @NotBlank
     private String imageurl;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "clinica", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConsultationModel> consultas;
 

@@ -6,6 +6,8 @@ import com.clinic.vet_clinic.pet.dto.PetRequestDTO;
 import com.clinic.vet_clinic.pet.gender.Gender;
 import com.clinic.vet_clinic.pet.species.Species;
 import com.clinic.vet_clinic.user.model.UserModel;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -76,9 +78,11 @@ public class PetModel {
     @Enumerated(EnumType.STRING)
     private RodentBreed rodentBreed;
 
+    @JsonManagedReference // <-- ADICIONE AQUI (Pet é o 'pai' da consulta)
     @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConsultationModel> consultas;
 
+    @JsonBackReference // <-- ADICIONE AQUI (User é o 'pai' do Pet)
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private UserModel usuario;

@@ -1,35 +1,14 @@
 package com.clinic.vet_clinic.veterinary.dto;
 
-import com.clinic.vet_clinic.veterinary.model.VeterinaryModel;
-import lombok.*;
+import com.clinic.vet_clinic.veterinary.speciality.SpecialityEnum;
 
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class VeterinaryResponseDTO {
-
-    private Long id;
-    private String email;
-    private String name;
-    private String password;
-    private String crmv;
-    private String especialityenum;
-    private String phone;
-    private String imageurl;
-
-    public static VeterinaryResponseDTO fromModel(VeterinaryModel veterinaryModel){
-        return VeterinaryResponseDTO.builder()
-                .id(veterinaryModel.getId())
-                .name(veterinaryModel.getName())
-                .email(veterinaryModel.getEmail())
-                .phone(veterinaryModel.getPhone())
-                .imageurl(veterinaryModel.getImageurl())
-                .crmv(veterinaryModel.getCrmv())
-                .password(veterinaryModel.getPassword())
-                .especialityenum(veterinaryModel.getSpecialityenum().getDescricao()) // obter a descrição do Enum
-                .build();
-    }
-}
+public record VeterinaryResponseDTO(
+        Long id,
+        String name,
+        String email,
+        String crmv,
+        SpecialityEnum specialityenum,
+        String phone,
+        String imageurl
+) {}

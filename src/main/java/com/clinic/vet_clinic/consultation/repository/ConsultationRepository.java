@@ -1,39 +1,35 @@
 package com.clinic.vet_clinic.consultation.repository;
 
 import com.clinic.vet_clinic.consultation.model.ConsultationModel;
-import com.clinic.vet_clinic.veterinary.speciality.SpecialityEnum; // Certifique-se de que o caminho do pacote está correto
+import com.clinic.vet_clinic.veterinary.speciality.SpecialityEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 import java.time.LocalDate;
+import java.time.LocalTime; // Importe LocalTime
 import java.util.List;
 
-
 public interface ConsultationRepository extends JpaRepository<ConsultationModel, Long> {
-    // Pesquisar por data da consulta
-    List<ConsultationModel> findByConsultationdate(LocalDate consultationDate);
 
-    // Pesquisar por especialidade do médico (esta é a única definição necessária)
-    List<ConsultationModel> findBySpecialityEnum(SpecialityEnum speciality);
-
-    // Pesquisar por nome do médico (usando JOIN com VeterinaryModel)
-    @Query("SELECT c FROM ConsultationModel c JOIN c.veterinario v WHERE v.name LIKE %:veterinaryName%")
-    List<ConsultationModel> findByVeterinaryNameContaining(@Param("veterinaryName") String veterinaryName);
-
-    // Pesquisar por nome do paciente (usando JOIN com PetModel)
-    @Query("SELECT c FROM ConsultationModel c JOIN c.pet p WHERE p.name LIKE %:petName%")
-    List<ConsultationModel> findByPetNameContaining(@Param("petName") String petName);
-
-    // Você também pode querer combinar filtros, por exemplo:
-    List<ConsultationModel> findByConsultationdateAndSpecialityEnum(LocalDate consultationDate, SpecialityEnum speciality);
-
-    // Buscar consultas por ID do veterinário
+    // Busca por ID do Veterinário
     List<ConsultationModel> findByVeterinarioId(Long veterinarioId);
 
-    // Buscar consultas por ID do veterinário E especialidade
-    List<ConsultationModel> findByVeterinarioIdAndSpecialityEnum(Long veterinarioId, SpecialityEnum speciality);
+    // Busca por ID do Veterinário E Especialidade
+    List<ConsultationModel> findByVeterinarioIdAndSpecialityEnum(Long veterinarioId, SpecialityEnum specialityEnum);
 
-    // Você também pode adicionar filtros por data, paciente, etc., se precisar:
-    // List<ConsultationModel> findByConsultationdateBetween(LocalDate startDate, LocalDate endDate);
+    // Para buscar por data da consulta
+    List<ConsultationModel> findByConsultationdate(LocalDate date);
+
+    // Para buscar pela especialidade do enum
+    List<ConsultationModel> findBySpecialityEnum(SpecialityEnum speciality);
+
+    // Para buscar pelo nome do veterinário (navegando pela relação)
+    // O nome do método significa: "Busque em ConsultationModel, pelo campo 'veterinario',
+    // dentro dele pelo campo 'name', que contenha o texto fornecido, ignorando maiúsculas/minúsculas"
+    List<ConsultationModel> findByVeterinario_NameContainingIgnoreCase(String veterinaryName);
+
+    // Para buscar pelo nome do pet (navegando pela relação)
+    List<ConsultationModel> findByPet_NameContainingIgnoreCase(String petName);
+
+
+    // --- MÉTODO PARA A VALIDAÇÃO DE CONFLITO DE HORÁRIO ---
+    boolean existsByVeterinarioIdAndConsultationdateAndConsultationtime(Long veterinarioId, LocalDate date, LocalTime time);
 }

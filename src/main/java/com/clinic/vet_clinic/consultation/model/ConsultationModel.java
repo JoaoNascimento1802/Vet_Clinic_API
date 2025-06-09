@@ -6,6 +6,7 @@ import com.clinic.vet_clinic.pet.model.PetModel;
 import com.clinic.vet_clinic.user.model.UserModel;
 import com.clinic.vet_clinic.veterinary.model.VeterinaryModel;
 import com.clinic.vet_clinic.veterinary.speciality.SpecialityEnum;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,18 +51,22 @@ public class ConsultationModel {
         @Column(nullable = false)
         private String observations;
 
+        @JsonBackReference // <-- ADICIONE AQUI
         @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "pet_id")
         private PetModel pet;
 
+        @JsonBackReference // <-- ADICIONE AQUI
         @ManyToOne
         @JoinColumn(name = "usuario_id")
         private UserModel usuario;
+
 
         @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "veterinario_id")
         private VeterinaryModel veterinario;
 
+        @JsonBackReference
         @ManyToOne
         @JoinColumn(name = "clinica_id")
         private ClinicModel clinica;

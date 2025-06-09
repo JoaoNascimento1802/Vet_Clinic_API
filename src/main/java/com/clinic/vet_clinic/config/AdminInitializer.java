@@ -14,48 +14,42 @@ import java.util.Optional;
 @Configuration
 public class AdminInitializer {
 
-    // Este @Bean será executado automaticamente na inicialização da aplicação
     @Bean
     public CommandLineRunner initAdminUser(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            // Definições do usuário administrador
-            final String adminUsername = "admin";
-            final String adminEmail = "admin@vetclinic.com";
-            // A senha deve seguir o padrão: pelo menos um número, uma letra maiúscula,
-            // uma letra minúscula e um caractere especial.
-            final String adminPassword = "Admin@Password123"; // ATENÇÃO: Mude esta senha em produção!
-            final String adminPhone = "11912345678"; // Exemplo de telefone válido
-            final String adminAddress = "Rua Principal, 100 - Centro";
-            final String adminRg = "12345678X"; // Exemplo de RG válido
-            final String adminImageUrl = "https://example.com/admin_default_profile.jpg"; // URL de imagem padrão ou null
+            // ======== FAÇA A MUDANÇA TEMPORÁRIA AQUI ========
+            final String adminUsername = "meu-admin";                 // <-- Mude para um novo nome
+            final String adminEmail = "meuadmin@vetclinic.com";     // <-- Mude para um novo email
+            final String adminPassword = "MinhaSenhaAdmin@123";    // <-- Coloque uma nova senha forte
+            // ======================================================
 
-            // Verifica se um usuário com o username 'admin' já existe
+            // O resto do código pode continuar igual
+            final String adminPhone = "11900000000";
+            final String adminAddress = "Rua Admin, 123";
+            final String adminRg = "987654321";
+            final String adminImageUrl = "https://i.pravatar.cc/150";
+
+            // O código abaixo vai verificar se "meu-admin" existe. Como não existe, ele vai criar.
             Optional<UserModel> adminUser = userRepository.findByUsername(adminUsername);
 
             if (adminUser.isEmpty()) {
-                System.out.println("Usuário 'admin' não encontrado. Criando usuário administrador...");
+                System.out.println("Usuário '" + adminUsername + "' não encontrado. Criando usuário administrador...");
 
                 UserModel newAdmin = new UserModel();
                 newAdmin.setUsername(adminUsername);
                 newAdmin.setEmail(adminEmail);
-                newAdmin.setPassword(passwordEncoder.encode(adminPassword)); // Criptografa a senha!
+                newAdmin.setPassword(passwordEncoder.encode(adminPassword));
                 newAdmin.setPhone(adminPhone);
                 newAdmin.setAddress(adminAddress);
                 newAdmin.setRg(adminRg);
-                newAdmin.setImageurl(adminImageUrl); // Define a URL da imagem
-                newAdmin.setRole(UserRole.ADMIN); // Define a role como ADMIN (do seu enum UserRole)
+                newAdmin.setImageurl(adminImageUrl);
+                newAdmin.setRole(UserRole.ADMIN); // Garante que a role é ADMIN
 
-                try {
-                    userRepository.save(newAdmin);
-                    System.out.println("Usuário 'admin' criado com sucesso!");
-                } catch (Exception e) {
-                    System.err.println("Erro ao salvar o usuário admin: " + e.getMessage());
-                    // Isso pode ocorrer se houver uma violação de constraint (ex: RG/Email duplicado)
-                    // ou se alguma validação for mais complexa e não for coberta pelos dados mockados.
-                }
+                userRepository.save(newAdmin);
+                System.out.println("Usuário '" + adminUsername + "' criado com sucesso!");
 
             } else {
-                System.out.println("Usuário 'admin' já existe.");
+                System.out.println("Usuário '" + adminUsername + "' já existe.");
             }
         };
     }

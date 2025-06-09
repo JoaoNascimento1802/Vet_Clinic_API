@@ -1,5 +1,6 @@
 package com.clinic.vet_clinic.pet.controller; // Ajuste o pacote conforme sua estrutura
 
+import com.clinic.vet_clinic.pet.mapper.PetMapper;
 import com.clinic.vet_clinic.pet.model.PetModel;
 import com.clinic.vet_clinic.pet.repository.PetRepository;
 import com.clinic.vet_clinic.user.repository.UserRepository;
@@ -34,18 +35,21 @@ public class PetController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PetMapper petMapper; // <-- INJETE O MAPPER
+
     @GetMapping
     @Operation(summary = "Listar todos os pets")
     public ResponseEntity<List<PetResponseDTO>> getAllPets() {
         List<PetModel> pets = petRepository.findAll();
+        // USE O MAPPER PARA CONVERTER A LISTA
         List<PetResponseDTO> petDTOs = pets.stream()
-                .map(this::convertToPetResponseDTO)
+                .map(petMapper::toDTO) // ou .map(pet -> petMapper.toDTO(pet))
                 .collect(Collectors.toList());
 
-        return petDTOs.isEmpty()
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(petDTOs)
-                : ResponseEntity.ok(petDTOs);
+        return ResponseEntity.ok(petDTOs);
     }
+
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar pet por ID")
@@ -185,7 +189,8 @@ public class PetController {
                 pet.getFishBreed(),
                 pet.getRabbitBreed(),
                 pet.getReptileBreed(),
-                pet.getRodentBreed()
+                pet.getRodentBreed(),
+                pet.getUsuario().getId()
         );
     }
 }

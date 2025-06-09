@@ -22,5 +22,6 @@ public record PetResponseDTO (
         FishBreed fishBreed,
         RabbitBreed rabbitBreed,
         ReptileBreed reptileBreed,
-        RodentBreed rodentBreed
+        RodentBreed rodentBreed,
+        Long usuarioId
 ){}

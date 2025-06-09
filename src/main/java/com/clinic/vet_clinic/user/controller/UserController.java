@@ -9,41 +9,45 @@ import com.clinic.vet_clinic.user.role.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid; // Adicione se estiver usando validação no UserModel
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication; // <-- Adicione este import
+import org.springframework.security.core.annotation.AuthenticationPrincipal; // <-- Adicione este import
+import org.springframework.security.core.userdetails.UserDetails;
 // Removendo import de MultipartFile
 // import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
+import com.clinic.vet_clinic.user.dto.UserResponseDTO;
+import com.clinic.vet_clinic.user.mapper.UserMapper;
+import java.util.List;
+import java.util.stream.Collectors;
+
+
 @RestController
 @RequestMapping("/users")
-// @CrossOrigin(origins = "*") // Use o CorsConfig global, ou especifique aqui se precisar de regras diferentes
-@Tag(name = "Usuários", description = "Endpoints relacionados aos usuários da clínica")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper; // <-- Injete o Mapper
 
-    // Removendo a injeção da CloudinaryService
-    // @Autowired
-    // private CloudinaryService cloudinaryService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // GET /users - Listar todos os usuários
     @GetMapping
     @Operation(summary = "Listar todos os usuários")
-    public ResponseEntity<List<UserModel>> getAllUsers() {
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         List<UserModel> users = userRepository.findAll();
-        return users.isEmpty()
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(users)
-                : ResponseEntity.ok(users);
+        // Converte a lista de entidades para DTOs
+        List<UserResponseDTO> userDTOs = users.stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(userDTOs);
     }
 
     // GET /users/{id} - Buscar usuário por ID
@@ -54,6 +58,16 @@ public class UserController {
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
+    // ADICIONE ESTE NOVO MÉTODO DENTRO DA CLASSE
+    @GetMapping("/me")
+    @Operation(summary = "Verificar dados do usuário logado")
+    public ResponseEntity<Object> getCurrentUser(Authentication authentication) {
+        // Retorna os detalhes do principal (usuário) e suas permissões (authorities)
+        // Isso nos dirá exatamente qual é a ROLE que o Spring está vendo.
+        return ResponseEntity.ok(authentication.getPrincipal());
+    }
+
 
     @PostMapping("/register") // <-- Mude aqui para corresponder à regra pública
     @Operation(summary = "Registrar um novo usuário")

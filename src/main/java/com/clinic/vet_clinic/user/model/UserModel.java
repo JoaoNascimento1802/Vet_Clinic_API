@@ -4,6 +4,7 @@ import com.clinic.vet_clinic.consultation.model.ConsultationModel;
 import com.clinic.vet_clinic.pet.model.PetModel;
 import com.clinic.vet_clinic.user.role.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore; // Importe esta anotação!
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -68,13 +69,14 @@ public class UserModel implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @JsonIgnore // Já adicionado anteriormente para 'consultas'
+    @JsonManagedReference // <-- ADICIONE AQUI
     @OneToMany(mappedBy = "usuario" ,cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private List<ConsultationModel> consultas;
 
-    @JsonIgnore // <--- ADICIONE ESTA LINHA AQUI!
+    @JsonManagedReference // <-- ADICIONE AQUI
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PetModel> pets;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

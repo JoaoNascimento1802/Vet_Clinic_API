@@ -1,0 +1,28 @@
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    margin-bottom: 1.5rem; /* Adiciona um espaço abaixo do botão */
+    
+    background-color: transparent;
+    color: var(--cor-texto-secundario);
+    border: 1px solid var(--cor-borda);
+    border-radius: 20px; /* Deixa o botão mais arredondado */
+
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.backButton:hover {
+    background-color: #f8f9fa;
+    color: var(--cor-secundaria);
+    border-color: #c6c9cc;
+}
+
+.arrow {
+    font-size: 1.2rem;
+    line-height: 1;
+}

@@ -2,49 +2,23 @@ import React, { useState, useEffect, useCallback } from 'react';
 import useAuth from '../hooks/useAuth';
 import MainLayout from '../layouts/MainLayout';
 import LoadingSpinner from '../components/common/loadingspinner/LoadingSpinner';
-import PetFormModal from '../components/pets/PetFormModal'; // O modal que criamos antes
-
-// Serviços da API
+import PetFormModal from '../components/pets/PetFormModal';
 import { getAllPets, addPet, updatePet, deletePet } from '../api/petService';
+import { getAllUsers } from '../api/userService';
 
-// Estilos para a página (podem ser movidos para um .module.css se preferir)
-const pageTitleStyle = { 
-  fontSize: '2rem', 
-  color: '#333',
-  fontFamily: "'Poppins', sans-serif",
-};
-const listStyle = { 
-  display: 'grid', 
-  gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', 
-  gap: '20px', 
-  marginTop: '2rem' 
-};
-const cardStyle = { 
-  border: '1px solid #e0e0e0', 
-  borderRadius: '8px', 
-  padding: '1.25rem', 
-  backgroundColor: '#fff', 
-  boxShadow: '0 2px 5px rgba(0,0,0,0.05)' 
-};
-const imageStyle = { 
-  width: '100%', 
-  height: '180px', 
-  objectFit: 'cover', 
-  borderRadius: '4px' 
-};
-const buttonStyle = { 
-  padding: '8px 12px', 
-  border: 'none', 
-  borderRadius: '4px', 
-  cursor: 'pointer',
-  fontWeight: '500'
-};
+// Estilos
+const pageTitleStyle = { fontSize: '2rem', color: '#333' };
+const listStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px', marginTop: '2rem' };
+const cardStyle = { border: '1px solid #e0e0e0', borderRadius: '8px', padding: '1.25rem', backgroundColor: '#fff', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' };
+const imageStyle = { width: '100%', height: '180px', objectFit: 'cover', borderRadius: '4px' };
+const buttonStyle = { padding: '8px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' };
 
 const MyPetsPage = () => {
   const { user, isAdmin } = useAuth();
-
+  
   // Estados do componente
   const [petsToDisplay, setPetsToDisplay] = useState([]);
+  const [users, setUsers] = useState([]); // Estado para a lista de usuários (para o admin)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -52,97 +26,94 @@ const MyPetsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPet, setEditingPet] = useState(null);
 
-  // Função para buscar os pets
-  const fetchPets = useCallback(async () => {
-    if (!user) return; // Não faz nada se não houver usuário logado
-
+  // Função para buscar todos os dados necessários
+  const fetchData = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
-      setError(''); // Limpa erros anteriores
-      const allPets = await getAllPets();
+      setError('');
+      
+      const [petsData, usersData] = await Promise.all([
+        getAllPets(),
+        isAdmin ? getAllUsers() : Promise.resolve([]) // Só busca usuários se for admin
+      ]);
+
+      setUsers(usersData);
 
       if (isAdmin) {
-        // Se for admin, mostra todos os pets
-        setPetsToDisplay(allPets);
+        setPetsToDisplay(petsData);
       } else {
-        // Se for usuário comum, filtra apenas os seus pets
-        const userPets = allPets.filter(pet => pet.usuarioId === user.id);
-        setPetsToDisplay(userPets);
+        setPetsToDisplay(petsData.filter(pet => pet.usuarioId === user.id));
       }
 
     } catch (err) {
-      setError('Falha ao carregar os pets. Verifique sua conexão.');
+      setError('Falha ao carregar os dados.');
       console.error(err);
     } finally {
       setLoading(false);
     }
   }, [user, isAdmin]);
 
-  // Executa a busca de pets quando o componente é montado ou o usuário muda
   useEffect(() => {
-    fetchPets();
-  }, [fetchPets]);
+    fetchData();
+  }, [fetchData]);
   
-  // Funções para controlar o modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingPet(null);
   };
 
-  const handleAddNew = () => {
-    setEditingPet(null); // Garante que o formulário estará vazio
-    setIsModalOpen(true);
-  };
-
-  const handleEdit = (pet) => {
-    setEditingPet(pet); // Passa os dados do pet para o formulário
-    setIsModalOpen(true);
-  };
-  
-  // Função para salvar (adicionar ou editar)
   const handleSave = async (petData) => {
     try {
-      const payload = { ...petData, usuarioId: user.id };
-      
+      // Define o dono do pet: se for admin, usa o valor do formulário; se não, usa o próprio usuário logado.
+      const payload = { ...petData, usuarioId: isAdmin ? parseInt(petData.usuarioId) : user.id };
+
+      if (isAdmin && !payload.usuarioId) {
+        alert("Para administradores, é obrigatório selecionar o dono do pet.");
+        return;
+      }
+
       if (editingPet) {
         await updatePet(editingPet.id, payload);
       } else {
         await addPet(payload);
       }
       
-      fetchPets(); // Recarrega a lista de pets para mostrar a alteração
-      handleCloseModal(); // Fecha o modal
+      fetchData(); // Recarrega a lista de pets
+      handleCloseModal();
     } catch (err) {
-      alert("Erro ao salvar o pet. Verifique os dados e tente novamente.");
-      console.error(err);
+      alert("Erro ao salvar o pet. Verifique os dados.");
     }
   };
 
-  // Função para deletar
+  const handleAddNew = () => {
+    setEditingPet(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (pet) => {
+    setEditingPet(pet);
+    setIsModalOpen(true);
+  };
+
   const handleDelete = async (petId) => {
-    if (window.confirm('Tem certeza que deseja remover este pet? Esta ação não pode ser desfeita.')) {
+    if (window.confirm('Tem certeza que deseja remover este pet?')) {
         try {
             await deletePet(petId);
-            fetchPets(); // Recarrega a lista
+            fetchData();
         } catch (err) {
             alert('Falha ao remover o pet.');
         }
     }
-  }
+  };
 
-  // Define o título da página com base no papel do usuário
   const pageTitle = isAdmin ? "Gerenciar Todos os Pets" : "Meus Queridos Pets";
 
   const renderContent = () => {
-    if (loading) {
-      return <LoadingSpinner />;
-    }
-    if (error) {
-      return <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>;
-    }
-    if (petsToDisplay.length === 0) {
-      return <p>Nenhum pet encontrado.</p>;
-    }
+    if (loading) return <LoadingSpinner />;
+    if (error) return <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>;
+    if (petsToDisplay.length === 0) return <p>Nenhum pet encontrado.</p>;
+
     return (
       <div style={listStyle}>
         {petsToDisplay.map(pet => (
@@ -165,19 +136,18 @@ const MyPetsPage = () => {
     <MainLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={pageTitleStyle}>{pageTitle}</h1>
-        {!isAdmin && ( // Apenas usuários comuns veem o botão para adicionar para si mesmos
-            <button onClick={handleAddNew} style={{...buttonStyle, backgroundColor: '#28a745', color: 'white'}}>+ Adicionar Pet</button>
-        )}
+        <button onClick={handleAddNew} style={{...buttonStyle, backgroundColor: '#28a745', color: 'white'}}>+ Adicionar Pet</button>
       </div>
       
       {renderContent()}
 
-      {/* O componente do Modal é renderizado aqui, mas só aparece quando isModalOpen é true */}
       <PetFormModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSave}
         pet={editingPet}
+        isAdmin={isAdmin}
+        users={users}
       />
     </MainLayout>
   );

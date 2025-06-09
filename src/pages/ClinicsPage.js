@@ -18,26 +18,20 @@ const ClinicsPage = () => {
   const { isAdmin } = useAuth(); // Pega o status de admin do usuário logado
 
   const fetchClinics = useCallback(async () => {
-    // Só tenta buscar os dados se o usuário for admin
-    if (!isAdmin) {
-      setError('Acesso negado. Apenas administradores podem ver esta página.');
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
+      setError(''); // Limpa erros anteriores
       const data = await getAllClinics();
       setClinics(data);
     } catch (err) {
-      // Trata erros de rede ou outros problemas da API
+      // Este catch agora lidará com erros de rede, mas não mais com erros de permissão 403
       setError('Falha ao carregar clínicas. Tente novamente mais tarde.');
       console.error(err);
     } finally {
-      // Este bloco SEMPRE será executado, parando o "loading infinito"
+      // Este bloco sempre será executado, parando o "loading infinito"
       setLoading(false);
     }
-  }, [isAdmin]); // A função será recriada se o status de admin mudar
+  }, []); // A dependência 'isAdmin' recriada se o status de admin mudar
 
   useEffect(() => {
     fetchClinics();

@@ -1,0 +1,35 @@
+.tableContainer {
+    width: 100%;
+    overflow-x: auto; /* Permite a rolagem horizontal em telas pequenas */
+    -webkit-overflow-scrolling: touch; /* Melhora a experiência de scroll em iOS */
+    background-color: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    box-shadow: var(--sombra-padrao);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Força a rolagem em telas menores que 600px */
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--cor-borda);
+    text-align: left;
+    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+}
+
+.table thead tr {
+    background-color: #f8f9fa;
+}
+
+.table th {
+    font-weight: 600;
+    color: var(--cor-secundaria);
+}
+
+.table tbody tr:last-of-type td {
+    border-bottom: none;
+}

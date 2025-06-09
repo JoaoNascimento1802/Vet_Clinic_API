@@ -44,6 +44,12 @@ const AdminDashboardPage = () => {
                 <Link to="/admin/users" style={cardStyles} onMouseEnter={cardHoverStyle} onMouseLeave={cardUnhoverStyle}>
                     <h2>Gerenciar Usuários</h2>
                 </Link>
+                <Link to="/admin/pets" style={cardStyles}> {/* <-- MUDE O LINK AQUI */}
+                    <h2>Gerenciar Pets</h2>
+                </Link>
+                <Link to="/admin/reports" style={cardStyles}>
+                    <h2>Gerar Relatórios</h2>
+                </Link>
             </div>
         </MainLayout>
     );

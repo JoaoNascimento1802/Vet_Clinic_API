@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import styles from './FormModal.module.css'; // Reutilizamos o mesmo estilo
 
+// Array de especialidades CORRETO e COMPLETO, baseado na sua classe Java
 const specialities = [
-    'CLINICA_GERAL', 'CIRURGIA', 'ODONTOLOGIA', 'OFTALMOLOGIA',
-    'DERMATOLOGIA', 'ORTOPEDIA', 'CARDIOLOGIA', 'ONCOLOGIA',
-    'ANESTESIOLOGIA', 'EXAMES_IMAGEM', 'VACINACAO', 'INTERNACAO',
-    'EMERGENCIA', 'FISIOTERAPIA'
+    'CLINICO_GERAL', 'ANESTESIOLOGIA', 'CARDIOLOGIA', 'DERMATOLOGIA',
+    'ENDOCRINOLOGIA', 'GASTROENTEROLOGIA', 'NEUROLOGIA', 'NUTRICAO',
+    'OFTALMOLOGIA', 'ONCOLOGIA', 'ORTOPEDIA', 'REPRODUCAO_ANIMAL',
+    'PATOLOGIA', 'CIRURGIA_GERAL', 'CIRURGIA_ORTOPEDICA', 'ODONTOLOGIA',
+    'ZOOTECNIA', 'EXOTICOS', 'ACUPUNTURA', 'FISIOTERAPIA', 'IMAGINOLOGIA'
 ];
 
 const VeterinaryFormModal = ({ isOpen, onClose, onSave, vet }) => {
-  const initialState = { name: '', email: '', password: '', crmv: '', specialityenum: 'CLINICA_GERAL', phone: '', imageurl: '' };
+  const initialState = { name: '', email: '', password: '', crmv: '', specialityenum: 'CLINICO_GERAL', phone: '', imageurl: '' };
   const [formData, setFormData] = useState(initialState);
 
   useEffect(() => {
     if (vet) {
-      setFormData({ ...vet, password: '' }); // Limpa a senha por segurança
+      setFormData({ ...vet, password: '' }); 
     } else {
       setFormData(initialState);
     }
@@ -40,9 +42,17 @@ const VeterinaryFormModal = ({ isOpen, onClose, onSave, vet }) => {
           <input name="crmv" value={formData.crmv} onChange={handleChange} placeholder="CRMV" required className={styles.input} />
           <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Telefone" required className={styles.input} />
           <input name="imageurl" value={formData.imageurl} onChange={handleChange} placeholder="URL da Imagem" required className={styles.input} />
-          <select name="specialityenum" value={formData.specialityenum} onChange={handleChange} className={styles.input}>
-            {specialities.map(spec => <option key={spec} value={spec}>{spec.replace('_', ' ')}</option>)}
+          
+          {/* AQUI ESTÁ A LÓGICA CORRIGIDA DO DROPDOWN */}
+          <select name="specialityenum" value={formData.specialityenum} onChange={handleChange} required className={styles.input}>
+            {specialities.map(spec => (
+              <option key={spec} value={spec}>
+                {/* Transforma 'CLINICO_GERAL' em 'CLINICO GERAL' apenas para exibição */}
+                {spec.replace(/_/g, ' ')}
+              </option>
+            ))}
           </select>
+          
           <div className={styles.buttonGroup}>
             <button type="button" onClick={onClose} className={styles.cancelButton}>Cancelar</button>
             <button type="submit" className={styles.saveButton}>Salvar</button>

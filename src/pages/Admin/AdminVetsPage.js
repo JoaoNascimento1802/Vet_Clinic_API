@@ -3,6 +3,9 @@ import MainLayout from '../../layouts/MainLayout';
 import LoadingSpinner from '../../components/common/loadingspinner/LoadingSpinner';
 import VeterinaryFormModal from '../Admin/VeterinaryFormModal';
 import { getAllVeterinarians, addVeterinary, updateVeterinary, deleteVeterinary } from '../../api/vetService';
+import BackButton from '../../components/common/BackButton/BackButton'; // <-- 1. IMPORTE O BOTÃO
+
+
 
 // Estilos (podem ser movidos para um .module.css)
 const buttonStyle = { padding: '10px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' };
@@ -62,6 +65,7 @@ const AdminVetsPage = () => {
 
     return (
         <MainLayout>
+            <BackButton /> {}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h1>Gerenciar Veterinários</h1>
                 <button onClick={handleAddNew} style={buttonStyle}>+ Adicionar Novo Veterinário</button>

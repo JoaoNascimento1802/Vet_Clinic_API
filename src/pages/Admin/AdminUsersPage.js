@@ -3,6 +3,8 @@ import { getAllUsers, deleteUser } from '../../api/userService';
 import MainLayout from '../../layouts/MainLayout';
 import LoadingSpinner from '../../components/common/loadingspinner/LoadingSpinner';
 import useAuth from '../../hooks/useAuth';
+import BackButton from '../../components/common/BackButton/BackButton'; // <-- 1. IMPORTE O BOTÃO
+
 
 const tableCellStyle = { padding: '8px', border: '1px solid #ddd' };
 const buttonStyle = { marginRight: '5px', padding: '5px 10px', border: '1px solid', borderRadius: '4px', cursor: 'pointer' };
@@ -49,6 +51,8 @@ const AdminUsersPage = () => {
 
     return (
         <MainLayout>
+            <BackButton /> {/* <-- Esta é a linha que adiciona o botão */}
+
             <h1>Gerenciar Usuários</h1>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>

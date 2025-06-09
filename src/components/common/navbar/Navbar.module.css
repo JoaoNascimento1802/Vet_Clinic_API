@@ -1,8 +1,12 @@
-/* Navbar.module.css - Use as variáveis do index.css */
+/* Usando as variáveis de cor definidas no seu index.css */
 .navbar {
   background-color: var(--cor-superficie);
   box-shadow: var(--sombra-padrao);
   padding: 0.8rem 2rem;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -13,8 +17,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
+  height: 100%;
 }
 
 .navLogo {
@@ -22,6 +27,7 @@
   text-decoration: none;
   font-size: 1.8rem;
   font-weight: 600;
+  cursor: pointer;
 }
 
 .navMenu {
@@ -31,6 +37,12 @@
   margin: 0;
   padding: 0;
   gap: 1.5rem;
+}
+
+.navItem {
+  height: 80px;
+  display: flex;
+  align-items: center;
 }
 
 .navLink {
@@ -48,7 +60,7 @@
   position: absolute;
   width: 0;
   height: 2px;
-  bottom: -2px;
+  bottom: 25px; /* Ajuste para centralizar */
   left: 0;
   background-color: var(--cor-primaria);
   transition: width 0.3s ease;
@@ -90,13 +102,51 @@
   border-color: #c6c9cc;
 }
 
-.navButtonPrimary {
-  background-color: var(--cor-primaria);
-  color: white;
-  border-color: var(--cor-primaria);
+.menuIcon {
+  display: none; /* Escondido por padrão em telas grandes */
 }
 
-.navButtonPrimary:hover {
-  background-color: var(--cor-primaria-escura);
-  border-color: var(--cor-primaria-escura);
+
+/* --- ESTILOS PARA TELAS PEQUENAS (RESPONSIVIDADE) --- */
+@media (max-width: 960px) {
+  .navMenu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
+    position: absolute;
+    top: 80px;
+    left: -100%; /* Começa escondido fora da tela */
+    opacity: 1;
+    transition: all 0.5s ease;
+    background: var(--cor-superficie);
+    padding: 2rem 0;
+  }
+
+  .navMenu.active {
+    left: 0; /* Move o menu para dentro da tela */
+    opacity: 1;
+    z-index: 1;
+  }
+
+  .navItem {
+    height: auto;
+  }
+
+  .navLink::after {
+    bottom: -5px; /* Ajuste para o menu mobile */
+  }
+
+  .navAuth {
+    display: none; /* Esconde os botões da barra principal, eles devem ser recriados no menu se necessário */
+  }
+
+  .menuIcon {
+    display: block; /* Mostra o ícone "hambúrguer" */
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--cor-secundaria);
+  }
 }

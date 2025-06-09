@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
+import ReportsPage from '../pages/Admin/ReportsPage';
 
 // Páginas Públicas
 import HomePage from '../pages/HomePage';
@@ -21,6 +22,7 @@ import AdminClinicsPage from '../pages/Admin/AdminClinicsPage';
 import AdminVetsPage from '../pages/Admin/AdminVetsPage';
 import AdminUsersPage from '../pages/Admin/AdminUsersPage';
 import VetsPage from '../pages/VetsPage'; // Página de veterinários agora é de Admin
+import AdminPetsPage from '../pages/Admin/AdminPetsPage'; // Importe a nova página
 
 const AppRoutes = () => {
   return (
@@ -43,6 +45,7 @@ const AppRoutes = () => {
           <Route path="/my-pets" element={<MyPetsPage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin/reports" element={<ReportsPage />} /> 
         </Route>
 
 
@@ -54,6 +57,7 @@ const AppRoutes = () => {
           <Route path="/admin/clinics" element={<AdminClinicsPage />} />
           <Route path="/admin/vets" element={<AdminVetsPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/pets" element={<AdminPetsPage />} /> {/* <-- ADICIONE A NOVA ROTA AQUI */}
           
           {/* A lista de veterinários também é uma rota de admin, conforme o backend */}
           <Route path="/veterinarians" element={<VetsPage />} /> 

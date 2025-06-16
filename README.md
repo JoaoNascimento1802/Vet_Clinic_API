@@ -10,20 +10,36 @@
 
 ---
 
+## 🚀 Acesso ao Projeto
+
+- **Frontend (Site Online):** **[vet-clinic-api-front.vercel.app](https://vet-clinic-api-front.vercel.app/)**
+- **Documentação da API (Swagger):** **[API Backend no Azure](https://videogamee-audkgzdjceemames.brazilsouth-01.azurewebsites.net/swagger-ui.html)**
+
+- **Repositório Backend:** **[JoaoNascimento1802/Vet_Clinic_API](https://github.com/JoaoNascimento1802/Vet_Clinic_API)**
+- **Repositório Frontend:** **[Branch Main_Front no mesmo repositório](https://github.com/JoaoNascimento1802/Vet_Clinic_API/tree/Main_Front)**
+
+> **Credenciais de Administrador para Teste:**
+> - **Email:** `meuadmin@vetclinic.com`
+> - **Senha:** `MinhaSenhaAdmin@123`
+
+---
+
 ## 🎯 Funcionalidades Principais
 
-O sistema foi projetado com dois níveis de acesso distintos, oferecendo funcionalidades específicas para cada tipo de usuário.
+A aplicação possui dois níveis de acesso principais: Usuário Comum e Administrador.
 
 ### Para Usuários Comuns (`ROLE_USER`):
 - ✅ **Autenticação Segura:** Cadastro de novas contas e login com JWT.
 - ✅ **Visualização de Informações:** Acesso à lista de clínicas e veterinários disponíveis.
 - ✅ **Gerenciamento de Pets:** CRUD completo para seus próprios animais de estimação.
-- ✅ **Agendamento de Consultas:** Capacidade de agendar, ver e gerenciar suas próprias consultas.
-- ✅ **Regras de Negócio:** O sistema impede agendamentos em horários conflitantes (intervalo de 40 minutos para o mesmo médico).
+- ✅ **Agendamento de Consultas:**
+  - Capacidade de agendar novas consultas para seus pets, escolhendo a clínica, especialidade e veterinário.
+  - O sistema valida conflitos de horário, impedindo agendamentos com menos de 40 minutos de intervalo para o mesmo médico.
+- ✅ **Histórico:** Visualização de seu próprio histórico de consultas agendadas.
 
 ### Para Administradores (`ROLE_ADMIN`):
 - ✅ **Acesso Total:** Todas as funcionalidades de um usuário comum.
-- ✅ **Painel de Controle:** Acesso a endpoints de gerenciamento global.
+- ✅ **Painel de Controle:** Acesso a uma área de gerenciamento centralizada.
 - ✅ **CRUD Completo:** Gerenciamento total de **todas** as entidades do sistema:
     - Clínicas
     - Veterinários
@@ -42,7 +58,7 @@ O projeto foi construído seguindo as melhores práticas de desenvolvimento para
 - **Arquitetura em Camadas:** Divisão clara de responsabilidades entre `Controller` (camada de API), `Service` (camada de regras de negócio) e `Repository` (camada de acesso a dados).
 - **Segurança Stateless com JWT:** A autenticação é feita via tokens JWT, tornando a API sem estado e ideal para ser consumida por SPAs (Single-Page Applications) ou aplicativos móveis.
 - **Controle de Acesso por Papel (RBAC):** Spring Security é usado para definir permissões granulares para cada endpoint com base nos papéis `ROLE_USER` e `ROLE_ADMIN`.
-- **Padrão DTO (Data Transfer Object):** Uso extensivo de DTOs para requisições e respostas, desacoplando a API da estrutura do banco de dados, aumentando a segurança e evitando erros de serialização (como recursão infinita e lazy loading exceptions).
+- **Padrão DTO (Data Transfer Object):** Uso extensivo de DTOs para requisição e resposta, desacoplando a API da estrutura do banco de dados, aumentando a segurança e evitando erros de serialização.
 - **Mappers:** Classes dedicadas para a conversão entre Entidades JPA e DTOs.
 - **Gerenciamento de Exceções Global:** Um `@RestControllerAdvice` centraliza o tratamento de erros, retornando respostas JSON padronizadas e amigáveis para o frontend.
 - **Perfis de Configuração:** Uso de perfis (`dev` e `prod`) para separar as configurações de banco de dados de desenvolvimento (H2 em memória) e produção (MySQL).
@@ -93,7 +109,7 @@ O projeto foi construído seguindo as melhores práticas de desenvolvimento para
 
 Este projeto foi inteiramente desenvolvido e mantido por:
 
-- **João Emanuel** - [@JoaoNascimento1802](https://github.com/JoaoNascimento1802)
+- **João Gabriel** - [@JoaoNascimento1802](https://github.com/JoaoNascimento1802)
 
 ---
 

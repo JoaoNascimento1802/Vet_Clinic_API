@@ -93,7 +93,7 @@ O projeto foi construído seguindo as melhores práticas de desenvolvimento para
 
 Este projeto foi inteiramente desenvolvido e mantido por:
 
-- **João Gabriel** - [@JoaoNascimento1802](https://github.com/JoaoNascimento1802)
+- **João Emanuel** - [@JoaoNascimento1802](https://github.com/JoaoNascimento1802)
 
 ---
 

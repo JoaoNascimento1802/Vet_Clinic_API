@@ -15,6 +15,8 @@ Este é o projeto frontend da plataforma **VetClinic**, desenvolvido como uma **
 - **Documentação da API (Swagger):** **[API Backend no Azure](https://videogamee-audkgzdjceemames.brazilsouth-01.azurewebsites.net/swagger-ui.html)**
 
 - **Repositório Frontend:** **[Branch Main_Front no repositório principal](https://github.com/JoaoNascimento1802/Vet_Clinic_API/tree/Main_Front)**
+- **Repositório Backend:** **[JoaoNascimento1802/Vet_Clinic_API](https://github.com/JoaoNascimento1802/Vet_Clinic_API)**
+
 
 > **Credenciais de Administrador para Teste:**
 > - **Email:** `meuadmin@vetclinic.com`
@@ -61,8 +63,8 @@ A interface foi projetada para ser intuitiva e fornecer fluxos de trabalho compl
   - **Estado Global:** O `Context API` é utilizado para gerenciar o estado de autenticação (usuário logado, token, status de admin), disponibilizando-o para toda a aplicação.
 - **Navegação (Routing):** `React Router DOM` é usado para criar as rotas da SPA e permitir a navegação entre as páginas sem recarregar o navegador.
 - **Comunicação com API:** A biblioteca `Axios` é usada para todas as requisições HTTP para a API backend, centralizada em uma instância configurada.
-- **Estilização:** **CSS Modules** para criar estilos encapsulados por componente, evitando conflitos de classes. O design é **responsivo**, adaptando-se a telas de celular através de Media Queries.
-- **Deploy:** A aplicação está hospedada na **Vercel**, com integração contínua a partir do repositório Git.
+- **Estilização:** **CSS Modules** para criar estilos encapsulados por componente, evitando conflitos de classes. O design é **responsivo**, adaptando-se a dispositivos móveis através de Media Queries.
+- **Deploy:** A aplicação está hospedada na **Vercel**.
 
 ---
 
@@ -71,34 +73,54 @@ A interface foi projetada para ser intuitiva e fornecer fluxos de trabalho compl
 ### Pré-requisitos
 - Node.js (versão 18 ou superior)
 - npm ou yarn
+- Backend da VetClinic API rodando localmente na porta 8080.
 
 ### Configuração
-1.  Clone o repositório e navegue para a pasta do frontend:
-    ```bash
-    git clone [https://github.com/JoaoNascimento1802/Vet_Clinic_API.git](https://github.com/JoaoNascimento1802/Vet_Clinic_API.git)
-    cd Vet_Clinic_API/Vet_Clinic_API-main_frontend 
-    ```
-    *(Ajuste o nome da pasta `Vet_Clinic_API-main_frontend` se for diferente)*
-
+1.  Clone o repositório e navegue para a pasta do frontend.
 2.  Instale todas as dependências do projeto:
     ```bash
     npm install
     ```
-
 3.  **Crie o arquivo de ambiente (Passo Essencial):**
     - Na raiz da pasta do seu projeto frontend, crie um novo arquivo chamado `.env`.
-    - Dentro deste arquivo, adicione a seguinte linha (assumindo que seu backend está rodando localmente na porta 8080):
+    - Dentro deste arquivo, adicione a seguinte linha:
     ```
     REACT_APP_API_URL=http://localhost:8080
     ```
-
 4.  Execute a aplicação:
     ```bash
     npm start
     ```
-
 5.  O site será aberto automaticamente no seu navegador em [http://localhost:3000](http://localhost:3000).
 
 ---
 
 ## 🗂 Estrutura de Pastas (Simplificada)
+
+```text
+/src
+├── api/             # Serviços para chamadas à API (axios)
+├── components/      # Componentes reutilizáveis
+│   ├── common/      # Botões, Navbar, Footer, etc.
+│   ├── admin/       # Modais de formulário para admin
+│   └── pets/        # Modal de formulário de pet
+├── contexts/        # Context API (ex: AuthContext)
+├── hooks/           # Hooks customizados (ex: useAuth)
+├── layouts/         # Componentes de layout (ex: MainLayout)
+├── pages/           # Componentes de página (telas)
+│   └── Admin/       # Páginas do painel de admin
+└── routes/          # Configuração de rotas (AppRoutes)
+
+```
+
+## 👨‍💻 Autor
+
+Este projeto foi inteiramente desenvolvido e mantido por:
+
+- **João Emanuel** - [@JoaoNascimento1802](https://github.com/JoaoNascimento1802)
+
+---
+
+## 📄 Licença
+
+Este projeto é para fins educacionais e de portfólio, demonstrando a aplicação de tecnologias modernas de backend e boas práticas de desenvolvimento.

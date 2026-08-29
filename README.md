@@ -10,20 +10,6 @@
 
 ---
 
-## 🚀 Acesso ao Projeto
-
-- **Frontend (Site Online):** **[vet-clinic-api-front.vercel.app](https://vet-clinic-api-front.vercel.app/)**
-- **Documentação da API (Swagger):** **[API Backend no Azure](https://videogamee-audkgzdjceemames.brazilsouth-01.azurewebsites.net/swagger-ui.html)**
-
-- **Repositório Backend:** **[JoaoNascimento1802/Vet_Clinic_API](https://github.com/JoaoNascimento1802/Vet_Clinic_API)**
-- **Repositório Frontend:** **[Branch Main_Front no mesmo repositório](https://github.com/JoaoNascimento1802/Vet_Clinic_API/tree/Main_Front)**
-
-> **Credenciais de Administrador para Teste:**
-> - **Email:** `meuadmin@vetclinic.com`
-> - **Senha:** `MinhaSenhaAdmin@123`
-
----
-
 ## 🎯 Funcionalidades Principais
 
 A aplicação possui dois níveis de acesso principais: Usuário Comum e Administrador.

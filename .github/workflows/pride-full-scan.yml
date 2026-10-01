@@ -2,8 +2,9 @@ name: PRIDE Vision ASPM Full Scan
 
 on:
   push:
-    branches: [ "main" ]
-
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+  
 jobs:
   pride-security-scans:
     runs-on: ubuntu-latest

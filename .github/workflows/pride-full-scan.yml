@@ -107,3 +107,18 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
             -F "arquivo=@nuclei-report.jsonl" || echo "No dast found"
+
+                  # 7. EXECUTAR SECURITY GATE (Decisão final do Pipeline)
+      - name: Executar Security Gate no PRIDE
+        run: |
+          curl -X POST "${{ secrets.PRIDE_URL }}/api/ci/check" \
+            -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
+            -H "X-Tenant-ID: 2" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "application_id": ${{ secrets.PRIDE_APP_ID }},
+              "commit_sha": "'"$GITHUB_SHA"'",
+              "branch": "'"$GITHUB_REF_NAME"'",
+              "provider": "github",
+              "repository": "'"$GITHUB_REPOSITORY"'"
+            }'

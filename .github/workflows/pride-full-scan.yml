@@ -1,0 +1,107 @@
+name: PRIDE Vision ASPM Full Scan
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  pride-security-scans:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Gitleaks precisa do histórico todo
+
+      # 1. GITLEAKS (Segredos Vazados)
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          report-format: json
+          report-path: gitleaks-report.json
+        continue-on-error: true
+
+      - name: Upload Gitleaks
+        run: |
+          curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/gitleaks" \
+            -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
+            -H "X-Tenant-ID: 2" \
+            -F "file=@gitleaks-report.json"
+
+      # 2. SEMGREP (SAST / Código-fonte)
+      - name: Run Semgrep
+        run: |
+          pip install semgrep
+          semgrep scan --config auto --json -o semgrep-report.json || true
+
+      - name: Upload Semgrep
+        run: |
+          curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/semgrep" \
+            -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
+            -H "X-Tenant-ID: 2" \
+            -F "file=@semgrep-report.json"
+
+      # 3. TRIVY (Dependências / SCA)
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'json'
+          output: 'trivy-report.json'
+        continue-on-error: true
+
+      - name: Upload Trivy
+        run: |
+          curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/trivy" \
+            -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
+            -H "X-Tenant-ID: 2" \
+            -F "file=@trivy-report.json"
+
+      # 4. CHECKOV (Infraestrutura como Código - Terraform/K8s/CloudFormation)
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          output_format: json
+          output_file_path: checkov-report.json
+        continue-on-error: true
+
+      - name: Upload Checkov
+        run: |
+          curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/checkov" \
+            -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
+            -H "X-Tenant-ID: 2" \
+            -F "file=@checkov-report.json" || true
+
+      # 5. SYFT (Geração de SBOM / Cadeia de Suprimentos)
+      - name: Generate SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          format: cyclonedx-json
+          output-file: sbom.json
+
+      - name: Upload SBOM
+        run: |
+          curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/sboms/import" \
+            -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
+            -H "X-Tenant-ID: 2" \
+            -H "Content-Type: application/json" \
+            -d "@sbom.json"
+
+      # 6. NUCLEI (DAST / Scan de Execução)
+      # Nota: Nuclei testa a aplicação rodando. Troque a URL abaixo para a URL do seu ambiente de homologação.
+      - name: Run Nuclei
+        uses: projectdiscovery/nuclei-action@main
+        with:
+          target: "https://seu-ambiente-de-teste.com"
+          json-export: nuclei-report.jsonl
+        continue-on-error: true
+
+      - name: Upload Nuclei
+        run: |
+          curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/nuclei" \
+            -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
+            -H "X-Tenant-ID: 2" \
+            -F "file=@nuclei-report.jsonl" || true

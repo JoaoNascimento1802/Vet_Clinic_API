@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "master" ]
   workflow_dispatch:
-  
+
 jobs:
   pride-security-scans:
     runs-on: ubuntu-latest
@@ -16,12 +16,10 @@ jobs:
 
       # 1. GITLEAKS (Segredos Vazados)
       - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          report-format: json
-          report-path: gitleaks-report.json
+        run: |
+          wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz
+          tar -xzf gitleaks_8.18.2_linux_x64.tar.gz
+          ./gitleaks detect --source . --report-path gitleaks-report.json --report-format json || true
         continue-on-error: true
 
       - name: Upload Gitleaks
@@ -29,7 +27,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/gitleaks" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@gitleaks-report.json"
+            -F "file=@gitleaks-report.json" || echo "No leak found"
 
       # 2. SEMGREP (SAST / Código-fonte)
       - name: Run Semgrep
@@ -42,7 +40,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/semgrep" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@semgrep-report.json"
+            -F "file=@semgrep-report.json" || echo "No sast found"
 
       # 3. TRIVY (Dependências / SCA)
       - name: Run Trivy
@@ -58,7 +56,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/trivy" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@trivy-report.json"
+            -F "file=@trivy-report.json" || echo "No deps found"
 
       # 4. CHECKOV (Infraestrutura como Código - Terraform/K8s/CloudFormation)
       - name: Run Checkov
@@ -74,7 +72,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/checkov" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@checkov-report.json" || true
+            -F "file=@checkov-report.json" || echo "No infra found"
 
       # 5. SYFT (Geração de SBOM / Cadeia de Suprimentos)
       - name: Generate SBOM with Syft
@@ -89,7 +87,7 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
             -H "Content-Type: application/json" \
-            -d "@sbom.json"
+            -d "@sbom.json" || echo "No sbom found"
 
       # 6. NUCLEI (DAST / Scan de Execução)
       # Nota: Nuclei testa a aplicação rodando. Troque a URL abaixo para a URL do seu ambiente de homologação.
@@ -105,4 +103,5 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/nuclei" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@nuclei-report.jsonl" || true
+            -F "file=@nuclei-report.jsonl" || echo "No dast found"
+

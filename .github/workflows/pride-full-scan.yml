@@ -42,6 +42,10 @@ jobs:
             -H "X-Tenant-ID: 2" \
             -F "file=@semgrep-report.json" || echo "No sast found"
 
+      # PREPARAÇÃO PARA O TRIVY (Evitar Erro 429 de Rate Limit do Maven)
+      - name: Resolve Java Dependencies
+        run: mvn dependency:resolve || echo "Maven falhou ao resolver, mas seguindo em frente"
+
       # 3. TRIVY (Dependências / SCA)
       - name: Run Trivy
         uses: aquasecurity/trivy-action@master
@@ -104,4 +108,3 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
             -F "file=@nuclei-report.jsonl" || echo "No dast found"
-

@@ -27,7 +27,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/gitleaks" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@gitleaks-report.json" || echo "No leak found"
+            -F "arquivo=@gitleaks-report.json" || echo "No leak found"
 
       # 2. SEMGREP (SAST / Código-fonte)
       - name: Run Semgrep
@@ -40,7 +40,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/semgrep" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@semgrep-report.json" || echo "No sast found"
+            -F "arquivo=@semgrep-report.json" || echo "No sast found"
 
       # PREPARAÇÃO PARA O TRIVY (Evitar Erro 429 de Rate Limit do Maven)
       - name: Resolve Java Dependencies
@@ -60,7 +60,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/trivy" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@trivy-report.json" || echo "No deps found"
+            -F "arquivo=@trivy-report.json" || echo "No deps found"
 
       # 4. CHECKOV (Infraestrutura como Código - Terraform/K8s/CloudFormation)
       - name: Run Checkov
@@ -76,7 +76,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/checkov" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@checkov-report.json" || echo "No infra found"
+            -F "arquivo=@checkov-report.json" || echo "No infra found"
 
       # 5. SYFT (Geração de SBOM / Cadeia de Suprimentos)
       - name: Generate SBOM with Syft
@@ -90,8 +90,7 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/sboms/import" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -H "Content-Type: application/json" \
-            -d "@sbom.json" || echo "No sbom found"
+            -F "arquivo=@sbom.json" || echo "No sbom found"
 
       # 6. NUCLEI (DAST / Scan de Execução)
       # Nota: Nuclei testa a aplicação rodando. Troque a URL abaixo para a URL do seu ambiente de homologação.
@@ -107,4 +106,4 @@ jobs:
           curl -X POST "${{ secrets.PRIDE_URL }}/api/aplicacoes/${{ secrets.PRIDE_APP_ID }}/uploads/nuclei" \
             -H "Authorization: Bearer ${{ secrets.PRIDE_TOKEN }}" \
             -H "X-Tenant-ID: 2" \
-            -F "file=@nuclei-report.jsonl" || echo "No dast found"
+            -F "arquivo=@nuclei-report.jsonl" || echo "No dast found"
